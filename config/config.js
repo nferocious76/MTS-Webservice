@@ -35,9 +35,9 @@ exports.redisConfig = {
 exports.dbConfig = {
     connectionLimit: 100,
     host: 'localhost',
-    user: 'solarsuite',
-    password: 'pwd@solarsuite',
-    database: 'solarsuite',
+    user: 'mts19052018',
+    password: 'pwd@mts19052018',
+    database: 'mts',
     debug: false
 };
 
