@@ -1,0 +1,29 @@
+{
+  "name": "mts-webservice",
+  "version": "1.0.0",
+  "description": "Movie Ticketing System Webservice",
+  "main": "app.js",
+  "scripts": {
+    "test": "start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://nferocious76@bitbucket.org/nferocious76/mts-webservice.git"
+  },
+  "keywords": [
+    "mts"
+  ],
+  "author": "Neil Francis Ramirez Hipona",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/nferocious76/mts-webservice#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "express": "^4.16.3",
+    "https": "^1.0.0",
+    "jsonwebtoken": "^8.2.1",
+    "morgan": "^1.9.0",
+    "node-mysql": "^0.4.2",
+    "redis": "^2.8.0",
+    "socket.io": "^2.1.1"
+  }
+}
