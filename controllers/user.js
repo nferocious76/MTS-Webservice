@@ -13,7 +13,7 @@ const LOGIN_SUCCESS         = 'Login successful';
 
 module.exports = (database, auth) => {
 
-    fucntion create(req, res) {
+    function create(req, res) {
 
         function proceed() {
 
@@ -89,7 +89,7 @@ module.exports = (database, auth) => {
         proceed();
     }
 
-    fucntion signin(req, res) {
+    function signin(req, res) {
 
         function proceed() {
 
