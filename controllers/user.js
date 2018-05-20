@@ -10,6 +10,7 @@ const COULD_NOT_CREATE_USER = 'Could not create user';
 const USER_CREATED          = 'User created';
 const LOGIN_FAILED          = 'Invalid username or password';
 const LOGIN_SUCCESS         = 'Login successful';
+const USER_EXISTS           = 'Email already exists';
 
 module.exports = (database, auth) => {
 
@@ -34,8 +35,8 @@ module.exports = (database, auth) => {
 
                 let query = 'SELECT * FROM `user` WHERE `email` = ?';
                 connection.query(query, data.email, (err, rows, fields) => {
-                    if (err) { return helper.send400(connection, res, err, COULD_NOT_CREATE_USER); }
-                    if (rows.length > 0) { return helper.send400(connection, res, err, 'Email already exists'); }
+                    if (err) { return helper.send400(helper.format_conn_err(connection, res, err, COULD_NOT_CREATE_USER)); }
+                    if (rows.length > 0) { return helper.send400(helper.format_conn_err(connection, res, err, USER_EXISTS)); }
 
                     encrypt_password(connection, data);
                 });
@@ -45,11 +46,11 @@ module.exports = (database, auth) => {
         function encrypt_password(connection, data) {
 
             bcrypt.genSalt(bcryptConf.rounds, (err, salt) => {
-                if (err) { return helper.send400(res, err, COULD_NOT_CREATE_USER); }
+                if (err) { return helper.send400(helper.format_err(res, err, COULD_NOT_CREATE_USER)); }
 
                 let password = data.password;
                 bcrypt.hash(password, salt, (err, hash) => {
-                    if (err) { return helper.send400(res, err, COULD_NOT_CREATE_USER); }
+                    if (err) { return helper.send400(helper.format_err(res, err, COULD_NOT_CREATE_USER)); }
 
                     data.password = hash;
                     create_user(connection, data);
@@ -61,7 +62,7 @@ module.exports = (database, auth) => {
             
             let query = 'INSERT INTO `user` SET ?';
             connection.query(query, data, (err, rows, fields) => {
-                if (err) { return helper.send400(connection, res, err, COULD_NOT_CREATE_USER); }
+                if (err) { return helper.send400(helper.format_conn_err(connection, res, err, COULD_NOT_CREATE_USER)); }
 
                 success_response(connection, rows.insertId);
             });
@@ -81,7 +82,7 @@ module.exports = (database, auth) => {
                     email: user.email
                 }, token => {
                     user.token = token;
-                    helper.send200(connection, res, user, USER_CREATED);
+                    helper.send200(helper.format_conn(connection, res, user, USER_CREATED));
                 });
             });
         }
@@ -109,7 +110,7 @@ module.exports = (database, auth) => {
                 
                 let query = 'SELECT * FROM `user` WHERE `email` = ?';
                 connection.query(query, data.email, (err, rows, fields) => {
-                    if (err || rows.length == 0) { return helper.send400(connection, res, err, LOGIN_FAILED); }
+                    if (err || rows.length == 0) { return helper.send400(helper.format_conn_err(connection, res, err, LOGIN_FAILED)); }
                     connection.release();
 
                     validate_data(data, rows[0]);
@@ -120,7 +121,7 @@ module.exports = (database, auth) => {
         function validate_data(data, user_data) {
 
             bcrypt.compare(data.password, user_data.password, (err, result) => {
-                if (err || !result) { return helper.send400(res, err, LOGIN_FAILED); }
+                if (err || !result) { return helper.send400(helper.format_err(res, err, LOGIN_FAILED)); }
 
                 delete user_data.password;
                 auth.sign({
@@ -129,7 +130,7 @@ module.exports = (database, auth) => {
                     email: user_data.email
                 }, token => {
                     user_data.token = token;
-                    heper.send200(res, user_data, LOGIN_SUCCESS);
+                    heper.send200(helper.format_data(res, user_data, LOGIN_SUCCESS));
                 });
             });
         }
@@ -139,6 +140,6 @@ module.exports = (database, auth) => {
 
     return {
         create,
-        sign
+        signin
     }
 };

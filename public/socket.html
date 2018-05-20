@@ -13,6 +13,8 @@
       #messages li:nth-child(odd) { background: #eee; }
       #messages { margin-bottom: 40px }
     </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <embed src="/public/beep.mp3" autostart="false" width="0" height="0" id="beep" enablejavascript="true">
   </head>
   <body>
     <ul id="messages"></ul>
@@ -23,7 +25,9 @@
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
       $(function () {
-        let socket = io('http://localhost:4776', { query: 'token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTgsImVtYWlsIjoiZnJhbmNpc0Bjb2RlZGlzcnVwdG9ycy5jb20iLCJ0eXBlIjoiY3VzdG9tZXIiLCJpYXQiOjE1MTk5ODI5MDQsImV4cCI6MTUzODEyNjkwNH0.GyBRIOjojEW4x5aa8A0oZ3k72L5_WWOVvE-UYaQQ1w0'});
+        let url = window.location.href.split(':4776')[0];
+        let location = `${url}:4776`;
+        let socket = io(location, { query: 'token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTgsImVtYWlsIjoiZnJhbmNpc0Bjb2RlZGlzcnVwdG9ycy5jb20iLCJ0eXBlIjoiY3VzdG9tZXIiLCJpYXQiOjE1MTk5ODI5MDQsImV4cCI6MTUzODEyNjkwNH0.GyBRIOjojEW4x5aa8A0oZ3k72L5_WWOVvE-UYaQQ1w0'});
 
         $('form').submit(function(){
           socket.emit('message', $('#m').val());
@@ -34,6 +38,9 @@
         socket.on('message', function(data){
           $('#messages').append($('<li>').text(data.from + ': ' + data.message));
           window.scrollTo(0, document.body.scrollHeight);
+          
+          let sound = document.getElementById('beep');
+          sound.play();
         });
 
         socket.on('status', (msg) => {

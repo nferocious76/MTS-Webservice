@@ -30,7 +30,7 @@ module.exports = (database, auth) => {
 
                 let query = 'INSERT INTO `rating` SET ?';
                 connection.query(query, data, (err, rows, fields) => {
-                    if (err) { return helper.send400(connection, res, err, COULD_NOT_CREATE_USER); }
+                    if (err) { return helper.send400(helper.format_conn_err(connection, res, err, COULD_NOT_CREATE_USER)); }
 
                     success_response(connection, rows.insertId);
                 });
@@ -42,7 +42,7 @@ module.exports = (database, auth) => {
             let query = 'SELECT * FROM `rating` WHERE `id` = ?';
             connection.query(query, id, (err, rows, fields) => {
 
-                helper.send200(connection, res, rows[0], RATING_CREATED);
+                helper.send200(helper.format_conn(connection, res, rows[0], RATING_CREATED));
             });
         }
 
@@ -62,9 +62,9 @@ module.exports = (database, auth) => {
                 let query = 'SELECT * FROM `rating` \
                     LIMIT ? OFFSET ?';
                 connection.query(query, [limit, offset], (err, rows, fields) => {
-                    if (err) { return helper.send400(connection, res, err, COULD_NOT_RETRIEVE_RATING); }
+                    if (err) { return helper.send400(helper.format_conn_err(connection, res, err, COULD_NOT_RETRIEVE_RATING)); }
 
-                    helper.send200(connection, res, rows, RATING_RETRIEVE);
+                    helper.send200(helper.format_conn(connection, res, rows, RATING_RETRIEVE));
                 });
             });
         }

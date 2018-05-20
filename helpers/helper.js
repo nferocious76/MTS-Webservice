@@ -34,24 +34,56 @@ exports.checkIsEmpty = (source, res, next) => {
 	next();
 };
 
-exports.send200 = (...args) => {
-	let res, data, message;
+exports.format_conn = (conn, res, data, msg) => {
+	return { 
+		conn: conn,
+		res: res,
+		data: data,
+		msg: msg
+	}
+}
 
-	if (args.length == 4) {
-		args[0].release();
+exports.format_conn_err = (conn, res, err, msg) => {
+	return { 
+		conn: conn,
+		res: res,
+		err: err,
+		msg: msg
+	}
+}
 
-		res = args[1];
-		data = args[2];
-		message = args[3];
-	}else if (args.length == 3) {
-		res = args[0];
-		data = args[1];
-		message = args[2];
-	}else{
-		res = args[0];
-		message = args[1];
+exports.format_data = (res, data, msg) => {
+	return {
+		res: res,
+		data: data,
+		msg: msg
+	}
+}
+
+exports.format_err = (res, err, msg) => {
+	return {
+		res: res,
+		err: err,
+		msg: msg
+	}
+}
+
+exports.format_res = (res, msg) => {
+	return {
+		res: res,
+		msg: msg
+	}
+}
+
+exports.send200 = (args) => {
+
+	if (args.conn) {
+		args.conn.release();
 	}
 
+	let res = args.res, 
+		data = args.data, 
+		message = args.msg;
 	let success_data = this.construct_success_data(message, data);
 
 	res.status(200)
@@ -59,21 +91,15 @@ exports.send200 = (...args) => {
 	.end();
 };
 
-exports.send400 = (...args) => {
-	let res, err, message;
+exports.send400 = (args) => {
 
-	if (args.length == 4) {
-		args[0].release();
-
-		res = args[1];
-		err = args[2];
-		message = args[3];
-	}else{
-		res = args[0];
-		err = args[1];
-		message = args[2];
+	if (args.conn) {
+		args.conn.release();
 	}
 
+	let res = args.res, 
+		err = args.err, 
+		message = args.msg;
 	let error_data = this.construct_error_data(message, this.checkError(err));
 
 	res.status(400)
@@ -81,8 +107,7 @@ exports.send400 = (...args) => {
 	.end();
 };
 
-exports.send403 = (...args) => {
-	let [res, err, message] = args;
+exports.send403 = (res, err, message) => {
 	let error_data = this.construct_error_data(message, this.checkError(err));
 
 	res.status(403)
