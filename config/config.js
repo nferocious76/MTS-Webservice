@@ -1,7 +1,7 @@
 'use strict';
 
 exports.serverConfig = {
-    port: 6477,
+    port: 4776,
     host: '127.0.0.1'
 };
 
@@ -12,7 +12,7 @@ exports.jwtConfig = {
 };
 
 exports.socketConfig = {
-    port: 6477,
+    port: 4776,
     host: '127.0.0.1'
 };
 
