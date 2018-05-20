@@ -8,6 +8,8 @@ const bcryptConf    = config.bcryptConfig;
 
 const COULD_NOT_CREATE_USER = 'Could not create user';
 const USER_CREATED          = 'User created';
+const LOGIN_FAILED          = 'Invalid username or password';
+const LOGIN_SUCCESS         = 'Login successful';
 
 module.exports = (database, auth) => {
 
@@ -59,7 +61,7 @@ module.exports = (database, auth) => {
             
             let query = 'INSERT INTO `user` SET ?';
             connection.query(query, data, (err, rows, fields) => {
-                if (err) { return helper.send400(connection, res, err, COULD_NOT_CREATE_USER) }
+                if (err) { return helper.send400(connection, res, err, COULD_NOT_CREATE_USER); }
 
                 success_response(connection, rows.insertId);
             });
@@ -87,7 +89,56 @@ module.exports = (database, auth) => {
         proceed();
     }
 
+    fucntion signin(req, res) {
+
+        function proceed() {
+
+            let form = {
+                username: '',
+                password: ''
+            }
+            helper.validateBody(form, req.body, res, () => {
+                login(req.body);
+            });
+        }
+
+        function login(data) {
+
+            database((err, connection) => {
+                if (err) { return helper.conn_err(res, err); }
+                
+                let query = 'SELECT * FROM `user` WHERE `email` = ?';
+                connection.query(query, data.email, (err, rows, fields) => {
+                    if (err || rows.length == 0) { return helper.send400(connection, res, err, LOGIN_FAILED); }
+                    connection.release();
+
+                    validate_data(data, rows[0]);
+                });
+            });
+        }
+
+        function validate_data(data, user_data) {
+
+            bcrypt.compare(data.password, user_data.password, (err, result) => {
+                if (err || !result) { return helper.send400(res, err, LOGIN_FAILED); }
+
+                delete user_data.password;
+                auth.sign({
+                    id: user_data.id,
+                    username: user_data.username,
+                    email: user_data.email
+                }, token => {
+                    user_data.token = token;
+                    heper.send200(res, user_data, LOGIN_SUCCESS);
+                });
+            });
+        }
+
+        proceed();
+    }
+
     return {
-        create
+        create,
+        sign
     }
 };
