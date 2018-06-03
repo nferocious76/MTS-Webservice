@@ -35,8 +35,8 @@ exports.redisConfig = {
 exports.dbConfig = {
     connectionLimit: 100,
     host: 'localhost',
-    user: 'mts19052018',
-    password: 'pwd@mts19052018',
+    user: 'root', //mts19052018
+    password: '', //pwd@mts19052018
     database: 'mts',
     debug: false
 };

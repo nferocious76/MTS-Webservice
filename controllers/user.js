@@ -59,7 +59,7 @@ module.exports = (database, auth) => {
         }
 
         function create_user(connection, data) {
-            
+
             let query = 'INSERT INTO `user` SET ?';
             connection.query(query, data, (err, rows, fields) => {
                 if (err) { return helper.send400(helper.format_conn_err(connection, res, err, COULD_NOT_CREATE_USER)); }
@@ -107,7 +107,7 @@ module.exports = (database, auth) => {
 
             database((err, connection) => {
                 if (err) { return helper.conn_err(res, err); }
-                
+
                 let query = 'SELECT * FROM `user` WHERE `email` = ?';
                 connection.query(query, data.email, (err, rows, fields) => {
                     if (err || rows.length == 0) { return helper.send400(helper.format_conn_err(connection, res, err, LOGIN_FAILED)); }

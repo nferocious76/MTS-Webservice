@@ -1,12 +1,12 @@
 'user strict';
 
 const helper        = require(__dirname + '/../helpers/helper.js');
-const config        = require(__dirname + '/../config/config.js');
 
 const COULD_NOT_CREATE_RATING   = 'Could not create rating';
 const COULD_NOT_RETRIEVE_RATING = 'Could not retrieve rating';
+const RATING_EXISTS             = 'Rating already exists';
 const RATING_CREATED            = 'Rating added';
-const RATING_RETRIEVE            = 'Rating retrieved';
+const RATING_RETRIEVE           = 'Rating retrieved';
 
 module.exports = (database, auth) => {
 
@@ -23,18 +23,31 @@ module.exports = (database, auth) => {
             });
         }
 
-        function create_rating(data) {
+        function check_if_exists(data) {
 
             database((err, connection) => {
                 if (err) { return helper.conn_err(res, err); }
 
-                let query = 'INSERT INTO `rating` SET ?';
-                connection.query(query, data, (err, rows, fields) => {
-                    if (err) { return helper.send400(helper.format_conn_err(connection, res, err, COULD_NOT_CREATE_USER)); }
+                let name = data.name.toLowerCase();
+                let query = 'SELECT * FROM `rating` \
+                  WHERE LOWER(name) = ?';
+                connection.query(query, [name], (err, rows, fields) => {
+                    if (err) { return helper.send400(helper.format_conn_err(connection, res, err, COULD_NOT_CREATE_RATING)); }
+                    if (rows.length > 0) { return helper.send400(helper.format_conn_err(connection, res, err, RATING_EXISTS)); }
 
-                    success_response(connection, rows.insertId);
+                    add_rating(connection, data);
                 });
             });
+        }
+
+        function add_rating(connection, data) {
+
+          let query = 'INSERT INTO `rating` SET ?';
+          connection.query(query, data, (err, rows, fields) => {
+              if (err) { return helper.send400(helper.format_conn_err(connection, res, err, COULD_NOT_CREATE_RATING)); }
+
+              success_response(connection, rows.insertId);
+          });
         }
 
         function success_response(connection, id) {
@@ -49,18 +62,19 @@ module.exports = (database, auth) => {
         proceed();
     }
 
-    function retrieve(req, res) {
+    function fetch(req, res) {
 
         function proceed() {
-
-            let limit = Number(req.query.limit) || 10;
-            let offset = Number(req.query.offset) || 0;
 
             database((err, connection) => {
                 if (err) { return helper.conn_err(res, err); }
 
+                let limit = req.body.limit || 0;
+                let offset = req.body.limit || 0;
+
                 let query = 'SELECT * FROM `rating` \
-                    LIMIT ? OFFSET ?';
+                  LIMIT ? OFFSET ?';
+
                 connection.query(query, [limit, offset], (err, rows, fields) => {
                     if (err) { return helper.send400(helper.format_conn_err(connection, res, err, COULD_NOT_RETRIEVE_RATING)); }
 
